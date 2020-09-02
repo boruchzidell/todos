@@ -24,6 +24,7 @@ before do
   session[:lists] ||= []
 end
 
+
 helpers do
   def class_complete?(list_index)
     todos_array = session[:lists][list_index.to_i][:todos]
