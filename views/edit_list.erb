@@ -3,8 +3,8 @@
     <h2>Editing <%= @list_name %></h2>
     <ul>
       <li>
-        <form action="/lists/<%= @index %>/destroy" method="post">
-          <button type="submit" class="delete" title="This action is irreversible!">
+        <form class="delete" action="/lists/<%= @index %>/destroy" method="post">
+          <button type="submit" class="delete">
             Delete list
           </button>
         </form>

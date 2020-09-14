@@ -9,7 +9,9 @@
           <button class="check" type="submit">Complete All</button>
         </form>
       </li>
-      <li><a class="edit" href="/lists/<%=@list_index%>/edit">Edit list name</a></li>
+      <li> <!-- Link to edit list -->
+        <a class="edit" href="/lists/<%=@list_index%>/edit">Edit list</a>
+      </li>
     </ul>
   </header>
 
@@ -28,7 +30,7 @@
 
           <h3><%= todo[:name] %></h3>
           
-          <form action="/lists/<%= @list_index%>/todos/<%= index %>/destroy" method="post" class="delete">
+          <form class="delete" action="/lists/<%= @list_index%>/todos/<%= index %>/destroy" method="post">
             <button type="submit">Delete</button>
           </form>
 

@@ -1,11 +1,13 @@
 #! /usr/bin/env ruby
+# TODO: move readme to README
+# TODO: README link to Heroku
+# TODO: refactor before filters
 
 require 'bundler/setup'
 require 'sinatra'
 require 'sinatra/reloader' if development?
 require 'sinatra/content_for'
 require 'tilt/erubis'
-
 require 'pry' if development?
 #### README #####
 # Data structure is array of hashes.
@@ -15,9 +17,9 @@ require 'pry' if development?
 ################
 
 configure do
-  set :sessions,
-    session_secret: 'secret',
-    expire_after: 365*24*60*60 # 365 days in seconds
+  set :sessions, expire_after: 365*24*60*60 # 365 days in seconds
+  set session_secret: 'secret'
+  set :erb, escape_html: true
 end
 
 before do
@@ -67,6 +69,15 @@ helpers do
   end
 end
 
+def load_list(index)
+  list = session[:lists][index.to_i]
+  return list if list
+
+  session[:error] = "List not found"
+  redirect "/"
+end
+
+
 get '/' do
   redirect '/lists'
 end
@@ -74,6 +85,7 @@ end
 # View all the lists
 get '/lists' do
   @lists = session[:lists]
+  p @lists
   erb :lists, layout: :layout
 end
 
@@ -83,13 +95,9 @@ get '/lists/new' do
 end
 
 # Retrieves a particular todo list hash
-get "/lists/:id" do |index|
-  @list_index = index.to_i
-  begin
-    @list = session[:lists].fetch(@list_index)
-  rescue
-    redirect "/"
-  end
+get "/lists/:list_id" do |index|
+  @list = load_list(index)
+  @list_index = index
 
   @list_name, @todos = @list[:name], @list[:todos]
 
@@ -97,15 +105,15 @@ get "/lists/:id" do |index|
 end
 
 # Render HTML form to edit list name
-get "/lists/:id/edit" do |id|
+get "/lists/:list_id/edit" do |id|
+  @list = load_list(id)
   @index = id
-  @list = session[:lists].fetch(@index.to_i)
   @list_name = @list[:name]
   erb :edit_list, layout: :layout  
 end
 
 # Update existing list
-post "/lists/:id" do |index|
+post "/lists/:list_id" do |index|
   @index = index
   @list_name = params[:list_name].strip
   current_list_name = session[:lists][index.to_i][:name]
@@ -137,7 +145,6 @@ def error_for_todo(text)
   end
 end
 
-
 # Create a new list
 post "/lists" do
   list_name = params[:list_name].strip
@@ -152,7 +159,7 @@ post "/lists" do
 end
 
 # Delete a list
-post "/lists/:id/destroy" do |index|
+post "/lists/:list_id/destroy" do |index|
   list_name = session[:lists][index.to_i][:name]
   session[:lists].delete_at(index.to_i)
   session[:success] = "The list \"#{list_name}\" has been deleted."
